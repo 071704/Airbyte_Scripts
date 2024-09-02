@@ -1,0 +1,157 @@
+Complete Airbyte API Workflow: A Step-by-Step Guide
+Table of Contents
+Introduction
+Prerequisites
+Step-by-Step Instructions
+Creating an Application
+Obtain an Access Token
+Create a Source
+Create a Destination
+Create a Connection
+Conclusion
+Introduction
+In this guide, we’ll walk through a comprehensive step-by-step process to complete the Airbyte API workflow. The Airbyte API empowers users to manage and automate data transfers between a wide array of sources and destinations. By offering a robust set of endpoints, it simplifies the orchestration of complex data workflows, making data integration seamless and efficient.
+
+Prerequisites
+Before you begin, ensure you have the following:
+
+An AWS account
+AWS CLI installed and configured
+Basic knowledge of AWS EC2 and Docker
+Docker installed on your EC2 Instance
+Airbyte installed on your EC2 Instance
+Preparation Steps:
+Launch the Airbyte Container: Start the Airbyte container on your EC2 instance. Image of launching Airbyte container
+Access the Airbyte UI: Navigate to the Airbyte UI by entering http://<instance_IP_address>:<port_number> in your web browser. Image of Airbyte UI
+Retrieve the Workspace ID: Obtain the Workspace ID from the URL in your developer portal. The Workspace ID is found between "workspace/" and the following "/". Image showing how to find Workspace ID
+Step-by-Step Instructions
+1. Creating an Application
+Access the Airbyte UI: Log into the Airbyte UI.
+Navigate to Settings: Go to the 'Settings' section and select 'Create Application.' Image of Create Application Screen
+Create the Application: Enter a name for your application and complete the creation process.
+Secure Your Credentials: Copy and securely store the Client ID and Client Secret, as these are essential for generating tokens.
+2. Obtain an Access Token
+Visit Airbyte Documentation: Refer to the Airbyte Reference - Getting Started.
+Generate Token:
+Navigate to the "Application" tab and click on "Get an Access Token."
+In the Body Params section, enter the client_id and client_secret obtained earlier, and set the grant_type to client_credentials.
+Choose your preferred programming language (e.g., Python) to generate the code. Image of API Documentation for Access Token
+Run the Code:
+Copy the generated code into a new file in Visual Studio Code (VSCode).
+Run the code using the command: docker-compose up. Image of Code Running in VSCode
+import requests
+client_id = 'your_client_id'
+client_secret = 'your_client_secret'
+
+
+response = requests.post(
+'https://api.airbyte.com/oauth/token',
+data={
+'grant_type': 'client_credentials',
+'client_id': client_id,
+'client_secret': client_secret,
+}
+)
+
+
+token = response.json()['access_token']
+print(token)
+
+Store the Token: The output will include an access token in JSON format. Save this token, noting that it is valid for only 3 minutes. Image of Token Output
+3. Create a Source
+Access Source Creation:
+Navigate to the "Source" tab within the Airbyte UI.
+Click on "Create a Source." Image of Source Creation Screen
+Configure the Source:
+Enter a name for your source and paste your workspace_id.
+Select the source configuration and provide credentials (e.g., for Google Sheets).
+Authorize and Run:
+Paste the access token in the authorization tab.
+Copy the generated Python code, paste it into a terminal or text editor, and execute it.
+import requests
+token = 'your_access_token'
+workspace_id = 'your_workspace_id'
+
+
+response = requests.post(
+'https://api.airbyte.com/sources/create',
+headers={'Authorization': f'Bearer {token}'},
+json={
+'workspaceId': workspace_id,
+'sourceDefinitionId': 'your_source_definition_id',
+'connectionConfiguration': {
+'credentials': 'your_credentials'
+},
+'name': 'your_source_name'
+}
+)
+
+
+source_id = response.json()['sourceId']
+print(source_id)
+
+Save the Source ID: The output will include a sourceId. Copy and securely store this ID for future use. Image of Code Running and Output
+4. Create a Destination
+Access Destination Creation:
+Navigate to the "Destination" tab in the Airbyte UI.
+Click on "Create a Destination." Image of Destination Creation Screen
+Configure the Destination:
+Enter a name for your destination and paste your workspace_id.
+Select your destination configuration and provide the necessary credentials (e.g., PostgreSQL).
+Authorize and Run:
+Paste the access token in the authorization tab.
+Copy the generated Python code, paste it into your text editor, and execute it.
+import requests
+token = 'your_access_token'
+workspace_id = 'your_workspace_id'
+
+
+response = requests.post(
+'https://api.airbyte.com/destinations/create',
+headers={'Authorization': f'Bearer {token}'},
+json={
+'workspaceId': workspace_id,
+'destinationDefinitionId': 'your_destination_definition_id',
+'connectionConfiguration': {
+'credentials': 'your_credentials'
+},
+'name': 'your_destination_name'
+}
+)
+
+
+destination_id = response.json()['destinationId']
+print(destination_id)
+
+Save the Destination ID: The output will include a destinationId. Copy and securely store this ID. Image of Code Running and Output
+5. Create a Connection
+Access Connection Creation:
+Navigate to the "Connection" tab and click on "Create Connection." Image of Connection Creation Screen
+Configure the Connection:
+Provide a name for the connection, along with the sourceId and destinationId obtained in previous steps.
+Generate and Run Code:
+Follow the process outlined previously to generate the code.
+Execute the code to establish a connection between your source and destination.
+import requests
+token = 'your_access_token'
+source_id = 'your_source_id'
+destination_id = 'your_destination_id'
+
+
+response = requests.post(
+'https://api.airbyte.com/connections/create',
+headers={'Authorization': f'Bearer {token}'},
+json={
+'sourceId': source_id,
+'destinationId': destination_id,
+'name': 'your_connection_name',
+'status': 'active'
+}
+)
+
+
+connection_id = response.json()['connectionId']
+print(connection_id)
+
+Conclusion
+Congratulations! You’ve successfully deployed the Airbyte API on an EC2 instance using Docker. With the setup complete, you can now use the Airbyte dashboard to manage your data integrations effortlessly. For more advanced configurations and integrations, refer to the Airbyte documentation.
